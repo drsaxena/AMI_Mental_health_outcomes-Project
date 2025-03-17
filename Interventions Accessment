@@ -1,0 +1,401 @@
+/****************************************************************************************/
+/*OUTCOME FOR PCI/CABG= 
+MEDPAR, OUTPATIENT, LINEK*/
+/*did a macro for all- medpar outpat linek */
+
+%macro h(yr,infile, indata);
+data hcp&yr (keep=bene_id hcpcs_cd thru_dt from_dt d_pci
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt));
+set &infile..&indata;
+d_pci=0;
+if hcpcs_cd in ("0066" "3601" "3602" "3605" "3606" "3607" "1755" "3609" "02703E6" "02723E6" "02703EZ" "02723EZ" "02703F6" "02723F6" "02703FZ" "02723FZ" "02703G6"
+"02723G6" "02703GZ" "02723GZ" "02703Z6" "02723Z6" "02703ZZ" "02723ZZ" "0270446" "0272446" "027044Z" "027244Z" "0270456" "0272456" "027045Z" "027245Z" "0270466" "0272466"
+"027046Z" "027246Z" "0270476" "0272476" "027047Z" "027247Z" "02704D6" "02724D6" "02704DZ" "02724DZ" "02704E6" "02724E6" "02704EZ" "02724EZ" "02704F6" "02724F6" "02704FZ" 
+"02724FZ" "02704G6" "02724G6" "02704GZ" "02724GZ" "02704Z6" "02724Z6" "02704ZZ" "02724ZZ" "0271346" "0273346" "027134Z" "027334Z" "0271356" "0273356" "027135Z" "027335Z" 
+"0271366" "0273366" "027136Z" "027336Z" "0271376" "0273376" "027137Z" "027337Z" "02713D6" "02733D6" "02713DZ" "02733DZ" "02713E6" "02733E6" "02713EZ" "02733EZ" "02713F6" 
+"02733F6" "02713FZ" "02733FZ" "02713G6" "02733G6" "02713GZ" "02733GZ" "02713Z6" "02733Z6" "02713ZZ" "02733ZZ" "0271446" "0273446" "027144Z" "027344Z" "0271456" "0273456"
+"027145Z" "027345Z" "0271466" "0273466" "027146Z" "027346Z" "0271476" "0273476" "027147Z" "027347Z" "02714D6" "02734D6" "02714DZ" "02734DZ" "02714E6" "02734E6" "02714EZ" 
+"02734EZ" "02714F6" "02734F6" "02714FZ" "02734FZ" "02714G6" "02734G6" "02714GZ" "02734GZ" "02714Z6" "02734Z6" "02714ZZ" "02734ZZ" "0270346" "0272346" "027034Z" "027234Z" 
+"0270356" "0272356" "027035Z" "027235Z" "0270366" "0272366" "027036Z" "027236Z" "0270376" "0272376" "027037Z" "027237Z" "02703D6" "02723D6" "02703DZ" "02723DZ"
+,"92920", "92921", "92924", "92925", "92928", "92929", "92933", "92934", "92937", "92938", "92941", "92943", "92944", "92973", "92974", "92975", "92978", "92979", 
+"93571", "93572", "C9600", "C9601", "C9602", "C9603", "C9604", "C9605", "C9606", "C9607", "C9608"
+) then D_PCI=1;
+run;
+proc sort data=hcp&yr; by bene_id; run;
+%mend;
+%h(2017, tx2017, bcarlinek2017);
+%h(2018, tx2018, bcarlinek2018);
+%h(2019, tx2019, bcarline2019);
+%h(2020, tx2020, bcarline2020);
+%macro h(yr,infile, indata);
+data hcp&yr (keep=bene_id hcpcs_cd CLM_THRU_DT d_pci
+rename=( CLM_THRU_DT=dschrg_dt));
+set &infile..&indata;
+d_pci=0;
+if hcpcs_cd in ("0066" "3601" "3602" "3605" "3606" "3607" "1755" "3609" "02703E6" "02723E6" "02703EZ" "02723EZ" "02703F6" "02723F6" "02703FZ" "02723FZ" "02703G6"
+"02723G6" "02703GZ" "02723GZ" "02703Z6" "02723Z6" "02703ZZ" "02723ZZ" "0270446" "0272446" "027044Z" "027244Z" "0270456" "0272456" "027045Z" "027245Z" "0270466" "0272466"
+"027046Z" "027246Z" "0270476" "0272476" "027047Z" "027247Z" "02704D6" "02724D6" "02704DZ" "02724DZ" "02704E6" "02724E6" "02704EZ" "02724EZ" "02704F6" "02724F6" "02704FZ" 
+"02724FZ" "02704G6" "02724G6" "02704GZ" "02724GZ" "02704Z6" "02724Z6" "02704ZZ" "02724ZZ" "0271346" "0273346" "027134Z" "027334Z" "0271356" "0273356" "027135Z" "027335Z" 
+"0271366" "0273366" "027136Z" "027336Z" "0271376" "0273376" "027137Z" "027337Z" "02713D6" "02733D6" "02713DZ" "02733DZ" "02713E6" "02733E6" "02713EZ" "02733EZ" "02713F6" 
+"02733F6" "02713FZ" "02733FZ" "02713G6" "02733G6" "02713GZ" "02733GZ" "02713Z6" "02733Z6" "02713ZZ" "02733ZZ" "0271446" "0273446" "027144Z" "027344Z" "0271456" "0273456"
+"027145Z" "027345Z" "0271466" "0273466" "027146Z" "027346Z" "0271476" "0273476" "027147Z" "027347Z" "02714D6" "02734D6" "02714DZ" "02734DZ" "02714E6" "02734E6" "02714EZ" 
+"02734EZ" "02714F6" "02734F6" "02714FZ" "02734FZ" "02714G6" "02734G6" "02714GZ" "02734GZ" "02714Z6" "02734Z6" "02714ZZ" "02734ZZ" "0270346" "0272346" "027034Z" "027234Z" 
+"0270356" "0272356" "027035Z" "027235Z" "0270366" "0272366" "027036Z" "027236Z" "0270376" "0272376" "027037Z" "027237Z" "02703D6" "02723D6" "02703DZ" "02723DZ"
+,"92920", "92921", "92924", "92925", "92928", "92929", "92933", "92934", "92937", "92938", "92941", "92943", "92944", "92973", "92974", "92975", "92978", "92979", 
+"93571", "93572", "C9600", "C9601", "C9602", "C9603", "C9604", "C9605", "C9606", "C9607", "C9608"
+) then D_PCI=1;
+run;
+proc sort data=hcp&yr; by bene_id; run;
+%mend;
+%h(2021, tx2021, bcarrier_line);
+
+
+data mi_c.hcpcs;
+set hcp2017-hcp2021;
+run;
+
+data hcpcs;
+set mi_c.hcpcs;
+run;
+
+proc sort data= hcpcs ; 
+by bene_id; run;
+
+proc print data=g (obs=10); run;
+
+data g;
+merge mi_c.ourdata (in=a) hcpcs (in=b);
+by bene_id; 
+if a and b;
+run;
+/*THIS IS ALL OUTPATIENT PCI*/
+data out_pci;
+set g;
+format dschrg_dt mmddyy10.;
+run;
+
+data hcpcs_90;
+set out_pci;
+    /* Calculate the difference in days between discharge date and index date */
+    days_diff = dschrg_dt - INDEX_DT;  
+
+    /* Keep records where the discharge date is within 0 to 90 days from the index date */
+    if 0 <= days_diff <= 90;
+
+    /* Optionally, you can drop the temporary variable 'days_diff' if it's no longer needed */
+    drop days_diff;
+run;
+
+proc sql;
+   create table o_pci as
+   select bene_id,
+          max(d_PCI) as PCI_out,
+          min(case when d_PCI = 1 then DSCHRG_DT else . end) as pci_outdt
+   from hcpcs_90
+   group by bene_id;
+quit;
+data o_pci;
+set o_pci;
+format pci_outdt mmddyy10.;
+run;
+
+proc print data=o_pci (obs=10); run;
+proc freq data=o_pci; tables pci_out; run;
+
+/*FOR THE OUTPATIENT PCI= WE GOT DATA ON= 41387 PATIENTS.
+
+IN 41387---> 13456 OUT PCI*/
+/************************************************/
+/*START INPATIENT PCI,CABG,SFT*/
+
+data b_id (keep=bene_id index_dt stemi nstemi);
+set mi_c.ourdata;
+run;
+
+proc sort data=mi_c.como; by bene_id;run;
+
+DATA MI_C.COMORB;
+MERGE MI_C.COMO (in=a) b_id (in=b);
+by bene_id;
+if a and b;
+run;
+
+data mi_c.treat;
+set mi_c.comorb;
+    
+    /* Calculate the difference in days between discharge date and index date */
+    days_diff = dschrg_dt - INDEX_DT;  
+
+    /* Keep records where the discharge date is within 0 to 90 days from the index date */
+    if 0 <= days_diff <= 90;
+
+    /* Optionally, you can drop the temporary variable 'days_diff' if it's no longer needed */
+    drop days_diff;
+run;
+
+proc print data=mi_c.treat (obs=10); run;
+
+/*INPAT PCI*/
+
+data checkpci;
+set mi_c.treat;
+
+array dia{25} prcdrcd1-prcdrcd25;
+tt_pci=0;
+do i=1 to 25;
+if dia{i} in ("0066" "3601" "3602" "3605" "3606" "3607" "1755" "3609" "02703E6" "02723E6" "02703EZ" "02723EZ" "02703F6" "02723F6" "02703FZ" "02723FZ" "02703G6"
+"02723G6" "02703GZ" "02723GZ" "02703Z6" "02723Z6" "02703ZZ" "02723ZZ" "0270446" "0272446" "027044Z" "027244Z" "0270456" "0272456" "027045Z" "027245Z" "0270466" "0272466"
+"027046Z" "027246Z" "0270476" "0272476" "027047Z" "027247Z" "02704D6" "02724D6" "02704DZ" "02724DZ" "02704E6" "02724E6" "02704EZ" "02724EZ" "02704F6" "02724F6" "02704FZ" 
+"02724FZ" "02704G6" "02724G6" "02704GZ" "02724GZ" "02704Z6" "02724Z6" "02704ZZ" "02724ZZ" "0271346" "0273346" "027134Z" "027334Z" "0271356" "0273356" "027135Z" "027335Z" 
+"0271366" "0273366" "027136Z" "027336Z" "0271376" "0273376" "027137Z" "027337Z" "02713D6" "02733D6" "02713DZ" "02733DZ" "02713E6" "02733E6" "02713EZ" "02733EZ" "02713F6" 
+"02733F6" "02713FZ" "02733FZ" "02713G6" "02733G6" "02713GZ" "02733GZ" "02713Z6" "02733Z6" "02713ZZ" "02733ZZ" "0271446" "0273446" "027144Z" "027344Z" "0271456" "0273456"
+"027145Z" "027345Z" "0271466" "0273466" "027146Z" "027346Z" "0271476" "0273476" "027147Z" "027347Z" "02714D6" "02734D6" "02714DZ" "02734DZ" "02714E6" "02734E6" "02714EZ" 
+"02734EZ" "02714F6" "02734F6" "02714FZ" "02734FZ" "02714G6" "02734G6" "02714GZ" "02734GZ" "02714Z6" "02734Z6" "02714ZZ" "02734ZZ" "0270346" "0272346" "027034Z" "027234Z" 
+"0270356" "0272356" "027035Z" "027235Z" "0270366" "0272366" "027036Z" "027236Z" "0270376" "0272376" "027037Z" "027237Z" "02703D6" "02723D6" "02703DZ" "02723DZ"
+,"92920", "92921", "92924", "92925", "92928", "92929", "92933", "92934", "92937", "92938", "92941", "92943", "92944", "92973", "92974", "92975", "92978", "92979", "93571", "93572", "C9600", "C9601", "C9602", "C9603", "C9604", "C9605", "C9606", "C9607", "C9608"
+) then tt_PCI=1;
+end;
+run;
+
+proc sql;
+   create table x1 as
+   select bene_id,
+          max(tt_PCI) as PCI,
+          min(case when tt_PCI = 1 then DSCHRG_DT else . end) as PCI_DT
+        
+   from checkpci
+   group by bene_id;
+quit;
+
+
+data x2; set x1;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format PCI_dt mmddyy10.;
+run;
+
+DATA pci;
+MERGE x2 (IN=A) mi_c.ourdata (IN=B); BY BENE_ID;
+IF A AND B;
+RUN;
+proc freq daa=pci; tables pci;run;
+
+/*INPAT CABG*/
+data checkCABG;
+set mi_c.treat;
+
+array dia{25} prcdrcd1-prcdrcd25;
+tt_CABG=0;
+do i=1 to 25;
+if dia{i} in ("361" "3610" "3611" "3612" "3613" "3614" "3615" "3616" "3617" "3619" "3620"
+"0210" "02100" "021008" "0210083" "0210088" "0210089" "021008C" "021008F" "021008W" "021009" "0210093" "0210098" "0210099" 
+"021009C" "021009F" "021009W" "02100A" "02100A3" "02100A8" "02100A9" "02100AC" "02100AF" "02100AW" "02100J" "02100J3" "02100J8" 
+"02100J9" "02100JC" "02100JF" "02100JW" "02100K" "02100K3" "02100K8" "02100K9" "02100KC" "02100KF" "02100KW" "02100Z" "02100Z3"
+"02100Z8" "02100Z9" "02100ZC" "02100ZF" "02103" "021034" "0210344" "02103D" "02103D4" "02104" "021044" "0210444" "021048" 
+"0210483" "0210488" "0210489" "021048C" "021048F" "021048W" "021049" "0210493" "0210498" "0210499" "021049C" "021049F" "021049W" 
+"02104A" "02104A3" "02104A8" "02104A9" "02104AC" "02104AF" "02104AW" "02104D" "02104D4" "02104J" "02104J3" "02104J8" "02104J9"
+"02104JC" "02104JF" "02104JW" "02104K" "02104K3" "02104K8" "02104K9" "02104KC" "02104KF" "02104KW" "02104Z" "02104Z3" "02104Z8" 
+"02104Z9" "02104ZC" "02104ZF" "0211" "02110" "021108" "0211083" "0211088" "0211089" "021108C" "021108F" "021108W" "021109" "0211093" 
+"0211098" "0211099" "021109C" "021109F" "021109W" "02110A" "02110A3" "02110A8" "02110A9" "02110AC" "02110AF" "02110AW" "02110J" 
+"02110J3" "02110J8" "02110J9" "02110JC" "02110JF" "02110JW" "02110K" "02110K3" "02110K8" "02110K9" "02110KC" "02110KF" "02110KW" 
+"02110Z" "02110Z3" "02110Z8" "02110Z9" "02110ZC" "02110ZF" "02113" "021134" "0211344" "02113D" "02113D4" "02114" "021144" "0211444"
+"021148" "0211483" "0211488" "0211489" "021148C" "021148F" "021148W" "021149" "0211493" "0211498" "0211499" "021149C" "021149F" 
+"021149W" "02114A" "02114A3" "02114A8" "02114A9" "02114AC" "02114AF" "02114AW" "02114D" "02114D4" "02114J" "02114J3" "02114J8" 
+"02114J9" "02114JC" "02114JF" "02114JW" "02114K" "02114K3" "02114K8" "02114K9" "02114KC" "02114KF" "02114KW" "02114Z" "02114Z3" 
+"02114Z8" "02114Z9" "02114ZC" "02114ZF" "0212" "02120" "021208" "0212083" "0212088" "0212089" "021208C" "021208F" "021208W" "021209" 
+"0212093" "0212098" "0212099" "021209C" "021209F" "021209W" "02120A" "02120A3" "02120A8" "02120A9" "02120AC" "02120AF" "02120AW"
+"02120J" "02120J3" "02120J8" "02120J9" "02120JC" "02120JF" "02120JW" "02120K" "02120K3" "02120K8" "02120K9" "02120KC" "02120KF"
+"02120KW" "02120Z" "02120Z3" "02120Z8" "02120Z9" "02120ZC" "02120ZF" "02123" "021234" "0212344" "02123D" "02123D4" "02124" "021244"
+"0212444" "021248" "0212483" "0212488" "0212489" "021248C" "021248F" "021248W" "021249" "0212493" "0212498" "0212499" "021249C" 
+"021249F" "021249W" "02124A" "02124A3" "02124A8" "02124A9" "02124AC" "02124AF" "02124AW" "02124D" "02124D4" "02124J" "02124J3" 
+"02124J8" "02124J9" "02124JC" "02124JF" "02124JW" "02124K" "02124K3" "02124K8" "02124K9" "02124KC" "02124KF" "02124KW" "02124Z"
+"02124Z3" "02124Z8" "02124Z9" "02124ZC" "02124ZF" "0213" "02130" "021308" "0213083" "0213088" "0213089" "021308C" "021308F" 
+"021308W" "021309" "0213093" "0213098" "0213099" "021309C" "021309F" "021309W" "02130A" "02130A3" "02130A8" "02130A9" "02130AC" 
+"02130AF" "02130AW" "02130J" "02130J3" "02130J8" "02130J9" "02130JC" "02130JF" "02130JW" "02130K" "02130K3" "02130K8" "02130K9" 
+"02130KC" "02130KF" "02130KW" "02130Z" "02130Z3" "02130Z8" "02130Z9" "02130ZC" "02130ZF" "02133" "021334" "0213344" "02133D" 
+"02133D4" "02134" "021344" "0213444" "021348" "0213483" "0213488" "0213489" "021348C" "021348F" "021348W" "021349" "0213493" 
+"0213498" "0213499" "021349C" "021349F" "021349W" "02134A" "02134A3" "02134A8" "02134A9" "02134AC" "02134AF" "02134AW" "02134D"
+"02134D4" "02134J" "02134J3" "02134J8" "02134J9" "02134JC" "02134JF" "02134JW" "02134K" "02134K3" "02134K8" "02134K9" "02134KC" 
+"02134KF" "02134KW" "02134Z" "02134Z3" "02134Z8" "02134Z9" "02134ZC" "02134ZF"
+)then tt_CABG=1;
+end;
+run;
+
+proc sql;
+   create table Y1 as
+   select bene_id,
+          max(tt_CABG) as CABG,
+          min(case when tt_CABG = 1 then DSCHRG_DT else . end) as CABG_DT
+        
+   from checkCABG
+   group by bene_id;
+quit;
+
+
+data Y2; set Y1;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format CABG_dt mmddyy10.;
+run;
+
+DATA CABG;
+MERGE Y2 (IN=A) mi_c.ourdata (IN=B); BY BENE_ID;
+IF A AND B;
+RUN;
+proc freq daTA=CABG; tables CABG;run;
+
+/*INPAT SFT*/
+data checkSFT;
+set mi_c.treat;
+
+ARRAY DIA {25} PRCDRCD1-PRCDRCD25;
+ARRAY DIAG {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+tt_SFT=0;
+do i=1 to 25;
+     if DIAG{i} in ("3E04317", "3E03317", "Z9282") or DIA{i} in ("3E04317", "3E03317", "Z9282") then tt_sft = 1;
+end;
+run;
+
+proc sql;
+   create table Z1 as
+   select bene_id,
+          max(tt_SFT) as SFT,
+          min(case when tt_SFT = 1 then DSCHRG_DT else . end) as SFT_DT
+        
+   from checkSFT
+   group by bene_id;
+quit;
+
+
+data Z2; set Z1;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format SFT_dt mmddyy10.;
+run;
+
+DATA SFT;
+MERGE Z2 (IN=A) mi_c.ourdata (IN=B); BY BENE_ID;
+IF A AND B;
+RUN;
+proc freq data=sft; tables sft;run;
+
+
+/***************************************************************/
+
+data alltreat1;
+merge o_pci pci cabg sft;
+by bene_id;
+run;
+
+data alltreat;
+set alltreat1;
+if pci_out=. then pci_out=0;
+if pci_outdt=. then pci_outdt=0;
+run;
+
+data treatment;
+    set alltreat;
+    /* Convert date string '01/01/1960' to a SAS date literal */
+    if pci_outdt = '01JAN1960'd then pci_outdt = .; /* Set to missing value */
+run;
+
+proc freq data=treatment; 
+    tables cabg_DT;
+run;
+
+proc print data=treatment (obs=10); 
+VAR BENE_ID PCI_OUT PCI_OUTDT PCI PCI_DT;
+run;
+
+/*NOW WE HAVE PROPER CABG SFT 
+WE HAVE 2 PCI -1 OUTPAT AND 1 INPAT
+WE NEED EARLIEST ONE*/
+
+data final_treatment;
+    set treatment;
+    final_pci = .; 
+    final_pci_date = .; 
+    
+  /* Case 1: Both PCI_out and PCI are present */
+    if PCI_out = 1 and PCI = 1 then do;
+        final_pci = 1;
+        final_pci_date = min(pci_outdt, PCI_DT);
+    end;
+    
+    /* Case 2: Only PCI_out is present */
+    else if PCI_out = 1 then do;
+        final_pci = PCI_out;
+        final_pci_date = pci_outdt;
+    end;
+    
+    /* Case 3: Only PCI is present */
+    else if PCI = 1 then do;
+        final_pci = PCI;
+        final_pci_date = PCI_DT;
+    end;
+    
+    /* Case 4: Neither PCI_out nor PCI is present (both are 0) */
+    else do;
+        final_pci = .; /* Leave as missing or set to 0 if you prefer */
+        final_pci_date = .; /* Leave as missing */
+    end;
+run;
+data final_tt;
+set final_treatment;
+format final_pci_date mmddyy10.; 
+run;
+
+data final_tt;
+set final_tt;
+if final_pci=. then final_pci=0;
+run;
+
+data mi_c.finaltt;
+set final_tt;
+run;
+
+
+proc freq data=mi_c.finaltt;
+tables final_pci_date;
+run;
+
+data mi_c.ourdata;
+set mi_c.finaltt;
+run;
+
+proc freq data=mi_c.ourdata;
+tables SFT*stemi;
+run;
+
+/*DATA Q;
+    SET MI_C.OURDATA;
+    /* Keep only records where DEATH_DT is within 90 days after INDEX_DT 
+    IF 0 < (DEATH_DT - INDEX_DT) <= 90;
+RUN;*/
+
+
+
+/*Among STEMI, How many patients got PCI */
+data stemi;
+set mi_c.ourdata;
+if stemi=1;
+run;
+proc freq data=stemi;
+tables sex*final_pci/chisq; run;
+
+proc freq data=stemi;
+tables sex*cabg/chisq; run;
+
+proc freq data=stemi;
+tables sex*sft/chisq; run;
+
+/*AMONG NSTEMI, HOW MANY GOT PCI,CABG SFT*/
+data nstemi;
+set mi_c.ourdata;
+if nstemi=1;
+run;
+proc freq data=nstemi;
+tables sex*final_pci/chisq; run;
+
+proc freq data=nstemi;
+tables sex*cabg/chisq; run;
+
+proc freq data=Nstemi;
+tables sex*SFT/chisq; run;
