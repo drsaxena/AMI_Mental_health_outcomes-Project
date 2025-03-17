@@ -1,0 +1,539 @@
+data MI_C.COMORB;
+    set MI_C.COMO;
+    if INDEX_dt - dschrg_dt <= 365 and INDEX_dt - dschrg_dt >= 0;
+run;
+
+  DATA DIAB1 ; SET MI_C.COMORB;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("25000", "25001", "25002", "25003", "25040", "25041", "25042", 
+    "25043", "25050", "25051", "25052", "25053", "25060", "25061", "25062", 
+    "25063", "25070", "25071", "25072", "25073", "25080", "25081", "25082", 
+    "25083", "E1021", "E1022", "E1029", "E10311", "E10319", "E10321", "E10329", 
+    "E10331", "E10339", "E10341", "E10349", "E10351", "E10359", "E1036", "E1039", 
+    "E1040", "E1041", "E1042", "E1043", "E1044", "E1049", "E1051", "E1052", 
+    "E1059", "E10610", "E10618", "E10620", "E10621", "E10622", "E10628", 
+    "E10641", "E10649", "E1065", "E1069", "E108", "E109", "E1121", "E1122", 
+    "E1129", "E11311", "E11319", "E11321", "E11329", "E11331", "E11339", 
+    "E11341", "E11349", "E11351", "E11359", "E1140", "E1141", "E1142", "E1143", 
+    "E1144", "E1149", "E1151", "E1152", "E1159", "E11610", "E11618", "E11641", 
+    "E11649", "E1165", "E1169", "E118", "E119","25000", "25001", "25002", "25003", "25010", "25011", "25012", "25013", "25020", "25021", "25022", "25023", "25030", "25031", "25032", "25033", "25040", "25041", "25042", "25043", "25050", "25051", "25052", "25053", "25060", "25061", "25062", "25063", "25070", "25071", "25072", "25073", "25080", "25081", "25082", "25083", "25090", "25091", "25092", "25093", "E1010", "E1011", "E1021", "E1022", "E1029", "E10311", "E10319", "E10321", "E103211", "E103212", "E103213", "E103219", "E10329", "E103291", "E103292", "E103293", "E103299", "E10331", "E103311", "E103312", "E103313", "E103319", "E10339", "E103391", "E103392", "E103393", "E103399", "E10341", "E103411", "E103412", "E103413", "E103419", "E10349", "E103491", "E103492", "E103493", "E103499", "E10351", "E103511", "E103512", "E103513", "E103519", "E10352", "E103521", "E103522", "E103523", "E103529", "E10353", "E103531", "E103532", "E103533", "E103539", "E10354", "E103541", "E103542", "E103543", "E103549", "E10355", "E103551", "E103552", "E103553", "E103559", "E10359", "E103591", "E103592", "E103593", "E103599", "E1036", "E1037", "E1037X1", "E1037X2", "E1037X3", "E1037X9", "E1039", "E1040", "E1041", "E1042", "E1043", "E1044", "E1049", "E1051", "E1052", "E1059", "E10610", "E10618", "E10620", "E10621", "E10622", "E10628", "E10630", "E10638", "E10641", "E10649", "E1065", "E1069", "E108", "E109") then d=1;
+end;
+RUN;
+ 
+DATA DIA; SET DIAB1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table diab as
+   select bene_id,
+          max(d) as diab
+   from dia
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge diab (IN=A) MI_C.OURDATA (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+/*bp*/
+   DATA bp1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("4010", "4011", "4019", "40200", "40201", "40210", "40211", "40290", "40291", "40300", "40301", "40310",
+"40311", "40390", "40391", "40400", "40401", "40402", "40403", "40410", "40411", "40412", "40413", "40490", "40491", "40492", 
+"40493", "40501", "40509", "40511", "40519", "40591", "40599", "I10", "I110", "I119", "I120", "I129", "I130", "I1310", "I1311", 
+"I132", "I150", "I151", "I152", "I158", "I159") then b=1;
+end;
+RUN;
+ 
+DATA b_p; SET bp1; 
+IF b=. THEN b=0; RUN;
+
+proc sql;
+   create table bp as
+   select bene_id,
+          max(b) as hypertension
+   from b_p
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge bp (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*obesity*/
+   DATA fat1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("27800", "27801", "27802", "27803", "E6601", "E6609", "E661", "E662", "E663", "E668", "E669") then d=1;
+end;
+RUN;
+ 
+DATA f; SET fat1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table fat as
+   select bene_id,
+          max(d) as obesity
+   from f
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge fat (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+PROC FREQ DATA=MI_C.ALLCOMORB; TABLES obesity*SEX/ CHISQ ; RUN;
+
+
+/*hyperlipid*/
+
+DATA D1; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("2724", "2722", "E782", "E7841", "E7849", "E784", "E785") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table dyslipid as
+   select bene_id,
+          max(d) as dyslipid
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge DYSLIPID (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+ 
+
+/*substance abuse*/
+   DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("98984", "3051", "E8694", "F17200", "F17201", "F17203", "F17208", "F17209", "F17210",
+"F17211", "F17213", "F17218", "F17219", "F17220", "F17221", "F17223", "F17228", "F17229", 
+"F17290", "F17291", "F17293", "F17298", "F17299","F1010", "F10120", "F10121", "F10129", "F1014", "F10150",
+"F10151", "F10159", "F10180", "F10181", "F10182", "F10188", "F1019","F1110", "F11120", "F11121", "F11122", "F11129", "F1114", "F11150",
+"F11151", "F11159", "F11181", "F11182", "F11188", "F1119", "F1120", "F11220", "F11221", "F11222", "F11229", "F1123", "F1124", "F11250",
+"F11251", "F11259", "F11281", "F11282", "F11288", "F1129", "F1190", "F11920", "F11921", "F11922", "F11929", "F1193", "F1194", "F11950",
+"F11951", "F11959", "F11981", "F11982", "F11988", "F1199", "T400X1A", "T400X1D", "T400X2A", "T400X2D", "T400X3A", "T400X3D", "T400X4A",
+"T400X4D", "T400X5A", "T400X5D", "T401X1A", "T401X1D", "T401X2A", "T401X2D", "T401X3A", "T401X3D", "T401X4A", "T401X4D", "T402X1A", 
+"T402X1D", "T402X2A", "T402X2D", "T402X3A", "T402X3D", "T402X4A", "T402X4D", "T402X5A", "T402X5D", "T403X1A", "T403X1D", "T403X2A",
+"T403X2D", "T403X3A", "T403X3D", "T403X4A", "T403X4D", "T403X5A", "T403X5D", "T404X1A", "T404X1D", "T404X2A", "T404X2D", "T404X3A", 
+"T404X3D", "T404X4A", "T404X4D", "T404X5A", "T404X5D", "T40601A", "T40601D", "T40602A", "T40602D", "T40603A", "T40603D", "T40604A", 
+"T40604D", "T40605A", "T40605D", "T40691A", "T40691D", "T40692A", "T40692D", "T40693A", "T40693D", "T40694A", "T40694D", "T40695A",
+"T40695D","F12188", "F1219", "F1220", "F1221", "F12220", "F12221", "F12222", "F12229", "F1223", "F12250", "F12251", "F12259", "F12280",
+"F12288", "F1229", "F1290", "F12920", "F12921", "F12922", "F12929", "F1293", "F12950", "F12951", "F12959", "F12980", "F12988", "F1299", 
+"F1310", "F1311", "F13120", "F13121", "F13129", "F13130", "F13131", "F13132", "F13139", "F1314", "F13150", "F13151", "F13159", "F13180",
+"F13181", "F13182", "F13188", "F1319", "F1321", "F13220", "F13221", "F13229", "F13230", "F13231", "F13232", "F13239", "F1324", "F13250",
+"F13251", "F13259", "F1326", "F1327", "F13280", "F13281", "F13282", "F13288", "F1329", "F1390", "F13920", "F13921", "F13929", "F13930",
+"F13931", "F13932", "F13939", "F1394", "F13950", "F13951", "F13959", "F1396", "F1397", "F13980", "F13981", "F13982", "F13988", "F1399",
+"F1410", "F1411", "F14120", "F14121", "F14122", "F14129", "F1413", "F1414", "F14150", "F14151", "F14159", "F14180", "F14181", "F14182",
+"F14188", "F1419", "F1421", "F14220", "F14221", "F14222", "F14229", "F1423", "F1424", "F14250", "F14251", "F14259", "F14280", "F14281",
+"F14282", "F14288", "F1429", "F1490", "F14920", "F14921", "F14922", "F14929", "F1493", "F1494", "F14950", "F14951", "F14959", "F14980", 
+"F14981", "F14982", "F14988", "F1499", "F1510", "F1511", "F15120", "F15121", "F15122", "F15129", "F1513", "F1514", "F15150", "F15151", 
+"F15159", "F15180", "F15181", "F15182", "F15188", "F1519", "F1521", "F15220", "F15221", "F15222", "F15229", "F1523", "F1524", "F15250",
+"F15251", "F15259", "F15280", "F15281", "F15282", "F15288", "F1529", "F1590", "F15920", "F15921", "F15922", "F15929", "F1593", "F1594",
+"F15950", "F15951", "F15959", "F15980", "F15981", "F15982", "F15988", "F1599", "F1610", "F1611", "F16120", "F16121", "F16122", "F16129",
+"F1614", "F16150", "F16151", "F16159", "F16180", "F16183", "F16188", "F1619", "F1621", "F16220", "F16221", "F16229", "F1624", "F16250",
+"F16251", "F16259", "F16280", "F16283", "F16288", "F1629", "F1690", "F16920", "F16921", "F16929", "F1694", "F16950", "F16951", "F16959", 
+"F16980", "F16983", "F16988", "F1699", "F17203", "F17208", "F17209", "F17213", "F17218", "F17219", "F17223", "F17228", "F17229", "F17293",
+"F17298", "F17299", "F1810", "F1811", "F18120", "F18121", "F18129", "F1814", "F18150", "F18151", "F18159", "F1817", "F18180", "F18188",
+"F1819", "F1821", "F18220", "F18221", "F18229", "F1824", "F18250", "F18251", "F18259", "F1827", "F18280", "F18288", "F1829", "F1890",
+"F18920", "F18921", "F18929", "F1894", "F18950", "F18951", "F18959", "F1897", "F18980", "F18988", "F1899", "F1910", "F1911", "F19120",
+"F19121", "F19122", "F19129", "F19130", "F19131", "F19132", "F19139", "F1914", "F19150", "F19151", "F19159", "F1916", "F1917", "F19180",
+"F19181", "F19182", "F19188", "F1919", "F1921", "F19220", "F19221", "F19222", "F19229", "F19230", "F19231", "F19232", "F19239", "F1924",
+"F19250", "F19251", "F19259", "F1926", "F1927", "F19280", "F19281", "F19282", "F19288", "F1929", "F1990", "F19920", "F19921", "F19922",
+"F19929", "F19930", "F19931", "F19932", "F19939", "F1994", "F19950", "F19951", "F19959", "F1996", "F1997", "F19980", "F19981", "F19982",
+"F19988", "F1999", "F530", "F531", "F550", "F551", "F552", "F553", "F554", "F558", "R780") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table tob as
+   select bene_id,
+          max(d) as substance
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge TOB (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*dual eligibility*/
+
+%MACRO MBSF (YR,INFILE,INDATA);
+DATA BENE (KEEP= BENE_ID dual&yr);
+SET &INFILE..&INDATA;
+  DUAL&yr= COMPRESS(DUAL_01||DUAL_02||DUAL_03||DUAL_04||DUAL_05||DUAL_06||DUAL_07||DUAL_08||DUAL_09||DUAL_10||DUAL_11||DUAL_12||" ");
+  RUN; 
+  DATA BENE&YR; SET BENE; RUN;
+%MEND;
+
+ %MBSF(2016, TX2016, MBSF_ABCD2016);
+%MBSF(2019, TX2019, MBSF_ABCD2019);
+%MBSF(2020,TX2020, MBSF_ABCD2020);
+
+
+
+%MACRO MBSF(YR, INFILE, INDATA);
+  DATA BENE(KEEP = dual&yr BENE_ID); 
+  SET &INFILE..&INDATA;
+ DUAL&yr= COMPRESS(DUAL_STUS_CD_01||DUAL_STUS_CD_02||DUAL_STUS_CD_03||DUAL_STUS_CD_04||DUAL_STUS_CD_05||DUAL_STUS_CD_06||DUAL_STUS_CD_07
+||DUAL_STUS_CD_08||DUAL_STUS_CD_09|DUAL_STUS_CD_10||DUAL_STUS_CD_11||DUAL_STUS_CD_12||" ");
+  RUN; 
+  DATA BENE&YR; SET BENE; RUN;
+%MEND;
+%MBSF(2017, TX2017, mbsf_abcd_summary17);
+%MBSF(2018, TX2018, mbsf_abcd_summary18);
+
+proc sort data= bene2016; by bene_id; run;
+proc sort data= bene2017; by bene_id; run;
+proc sort data= bene2018; by bene_id; run;
+proc sort data= bene2019; by bene_id; run;
+proc sort data= bene2020; by bene_id; run;
+
+
+DATA BENESUM; MERGE BENE2016-BENE2020; BY BENE_ID; RUN;
+
+proc sort data= benesum; by bene_id; run; 
+
+
+data bene_perio; merge MI_C.OURDATA (in=in1) benesum (in=in2);  /*merge with apni main file file*/
+by bene_id; 
+if in1=1 and in2=1;
+run;
+
+data cohort; set bene_perio; 
+array miss {5} dual2016-dual2020;
+DO I=1 TO 5;
+IF miss{i}= "" then miss{i}= "XXXXXXXXXXXX";
+END; RUN; 
+
+
+data COMPRESS;
+set cohort;
+dual=compress(dual2016||dual2017||dual2018||dual2019||DUAL2020);
+run;
+data compress_single;
+    set compress;
+
+    /* Replacing double-digit codes with single letters or digits */
+    dual = compress(dual, , 'kad'); /* Remove all digits and keep only alphabetic characters */
+    dual = tranwrd(dual, '00', '0');
+    dual = tranwrd(dual, '01', '1');
+    dual = tranwrd(dual, '02', '2');
+    dual = tranwrd(dual, '03', '3');
+    dual = tranwrd(dual, '04', '4');
+    dual = tranwrd(dual, '05', '5');
+    dual = tranwrd(dual, '06', '6');
+    dual = tranwrd(dual, '08', '8');
+    dual = tranwrd(dual, '09', '9');
+    dual = tranwrd(dual, '99', 'U');
+    dual = tranwrd(dual, 'NA', 'N');
+    dual = tranwrd(dual, 'XX', 'X');
+run;
+
+data bene_dual;
+    set compress_SINGLE;
+
+    /* Initialize low_income and poor */
+    low_income = 0;
+    poor = 0;
+
+    /* Calculate the start and end points for the 6-month period before req_dt */
+    end = (year(INDEX_dt) - 2016) * 12 + month(INDEX_dt) - 1; /* Month before req_dt */
+    start = end - 5; /* 6 months period */
+
+    /* Check if dual string has any of the specified values in the 6 months before req_dt */
+    do i = start to end;
+        /* Ensure index is within the length of the dual string */
+        if i > 0 and i <= length(dual) then do;
+            if substr(dual, i, 1) in ("1", "2", "3", "4", "6", "8") then do;
+                low_income + 1;
+                leave; /* Exit loop as soon as a match is found */
+            end;
+        end;
+    end;
+
+    /* Determine poor status based on low_income count */
+    if low_income > 0 then poor = 1;
+    else poor = 0;
+run;
+
+data MI_C.ALLCOMORB; 
+merge BENE_DUAL (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*ckd*/
+  DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("5851", "5852", "5853"," 5854", "5855", "5856", "5859","N181", "N182", "N183", "N184", "N185", "N189", "N1830", "N1831", "N1832","N186" ) then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table ck as
+   select bene_id,
+          max(d) as ckd
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge CK (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+PROC FREQ DATA=MI_C.ALLCOMORB; TABLES ckd*SEX/ CHISQ ; RUN;
+
+
+/*PRIOR MI*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("412","I252") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table PM as
+   select bene_id,
+          max(d) as PMI
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge PM (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+PROC FREQ DATA=MI_C.ALLCOMORB; TABLES pmi*SEX/ CHISQ ; RUN;
+
+
+/*PRIOR STROKE*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("438", "V1254", "Z8673") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table PS as
+   select bene_id,
+          max(d) as PSTR
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge PS (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+
+/*AF*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("42731","42732","I483","I484","I4892","I480", "I4811","I4820", "I4821", "I4891 ") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table A as
+   select bene_id,
+          max(d) as AF
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge A (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*LUNG DISEASE*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("J410", "J411", "J418", "J42", "J430", "J431", "J432", "J438", "J439", "J440", "J441", "J449", "J4520", "J4521", "J4522", 
+"J4530", "J4531", "J4532", "J4540", "J4541", "J4542", "J4550", "J4551", "J4552", "J45901", "J45902", "J45909", "J45990", "J45991", "J45998", "J470", "J471", "J479"
+"4910", "4911", "49120", "49121", "49122", "4918", "4919", "4920", "4928", "49300", "49301", "49302", "49310", "49311", "49312", "49320", "49321", "49322", "49381", "49382", "49390", "49391", "49392") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table LD as
+   select bene_id,
+          max(d) as LUNG
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge LD (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*PERIPHERAL ARTERY D*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+do i = 1 to 25;
+if DIA{i} in ("I739","I7389","44389","4439"
+) then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table PD as
+   select bene_id,
+          max(d) as PAD
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge PD (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*artheroschlerotic hd*/
+ DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("41401", "4292", "4111","4140", "41401", "I2510","I25110","I25111","I25112","I25118","I25119
+") then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table A as
+   select bene_id,
+          max(d) as AHD
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge A (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+
+/*prior hf*/
+DATA D1 ; SET MI_C.comorb;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("428", "4280", "4281", "4282", "42820", "42821", "42822", "42823", "4283", "42830", "42831", "42832", "42833", "4284",
+"42840", "42841", "42842", "42843", "4289", "40201", "40211", "40291", "40401", "40403", "40411", "40413", "40491", "40493", "I50", "I501", "I502",
+"I5020", "I5021", "I5022", "I5023", "I503", "I5030", "I5031", "I5032", "I5033", "I504", "I5040", "I5041", "I5042", "I5043", "I508", "I5081", 
+"I50810", "I50811", "I50812", "I50813", "I50814", "I5082", "I5083", "I5084", "I5089", "I509")then d=1;
+end;
+RUN;
+ 
+DATA D; SET D1; 
+IF D=. THEN d=0; RUN;
+
+proc sql;
+   create table ph as
+   select bene_id,
+          max(d) as phf
+   from d
+   group by bene_id;
+quit;
+
+data MI_C.ALLCOMORB; 
+merge PH (IN=A) MI_C.ALLCOMORB (IN=B); 
+by bene_id; IF A AND B;
+run;
+
+PROC FREQ DATA=MI_C.ALLCOMORB; TABLES stemi*SEX/ CHISQ ; RUN;
+
+
+data hx; set mi_c.allcomorb;
+if hx_anxiety=1 or hx_depression=1 or hx_amnesia=1 or hx_dementia=1 then hx_event=1;
+else hx_event=0;
+run;
+
+data mi_c.allcomorb;
+set hx; run;
+
+data mi_c.allcomorb;
+set mi_c.allcomorb;
+if rti_race_cd in ("0","3","6") then race=0; /*others*/
+else if rti_race_cd=1 then race=1; /*	NON-HISPANIC WHITE*/
+else if rti_race_cd=2 then race=2;	/*BLACK (OR AFRICAN-AMERICAN)*/
+else if rti_race_cd=4 then race=3;	/*ASIAN/PACIFIC ISLANDER*/
+else if rti_race_cd=5 then race=4; /*	HISPANIC*/
+run;
+
+data orec;
+set mi_c.ourdata;
+esrd=0;
+if orec in (2,3) then esrd=1;
+run;
+proc freq data=orec;
+tables esrd;run;
+
+data mi_c.ourdata;
+set orec;
+run;
