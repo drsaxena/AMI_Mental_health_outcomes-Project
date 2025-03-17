@@ -1,0 +1,534 @@
+/*------------------------------------------------------------------------------------
+-------------------------------------------------------------------------------------*/
+
+/*OUTCOME FOR MENTAL HEALTH OUTCOME AND MI*/
+%macro o(yr, infile, indata, indata2, indata3);
+
+data medpar (keep=bene_id DGNSCD1-DGNSCD25 PRCDRCD1-PRCDRCD25 ADMSNDT DSCHRGDT
+rename=(admsndt=admsn_dt DSCHRGDT=dschrg_dt DGNSCD1-DGNSCD25=ICD_DGNS_CD1-ICD_DGNS_CD25 )); 
+set  &infile..&indata ;
+run;
+
+
+data outpatient (keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25  from_dt thru_dt ICD_PRCDR_CD1-ICD_PRCDR_CD25
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt ICD_PRCDR_CD1-ICD_PRCDR_CD25=PRCDRCD1-PRCDRCD25)); 
+set  &infile..&indata2 ;
+run;
+
+
+data carrier(keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25 from_dt thru_dt 
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata3 ;
+
+run;
+
+data o&yr; set medpar outpatient carrier; run;
+proc sort data= o&yr; by bene_id; run;
+
+data uni&yr;
+merge b_id (in=in1) o&yr (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+%mend;
+%o(2016, tx2016, medpar2016, otptclmsk2016, bcarclmsk2016);
+%o(2019, tx2019, medpar2019, otptclms2019, bcarclms2019 );
+%o(2020, tx2020, medpar2020, otptclms2020, bcarclms2020 );
+
+
+%macro out(yr, infile, indata, indata2, indata3);
+
+data medpar (keep=bene_id dgns_1_cd--dgns_25_cd SRGCL_PRCDR_1_CD--SRGCL_PRCDR_25_CD admsn_dt dschrg_dt 
+rename=(dgns_1_cd=ICD_DGNS_CD1 dgns_2_cd=ICD_DGNS_CD2 dgns_3_cd=ICD_DGNS_CD3 dgns_4_cd=ICD_DGNS_CD4 
+dgns_5_cd=ICD_DGNS_CD5 dgns_6_cd=ICD_DGNS_CD6 dgns_7_cd=ICD_DGNS_CD7 dgns_8_cd=ICD_DGNS_CD8 dgns_9_cd=ICD_DGNS_CD9 dgns_10_cd=ICD_DGNS_CD10
+dgns_11_cd=ICD_DGNS_CD11 dgns_12_cd=ICD_DGNS_CD12 dgns_13_cd=ICD_DGNS_CD13 dgns_14_cd=ICD_DGNS_CD14 dgns_15_cd=ICD_DGNS_CD15 dgns_16_cd=ICD_DGNS_CD16 
+dgns_17_cd=ICD_DGNS_CD17 dgns_18_cd=ICD_DGNS_CD18 dgns_19_cd=ICD_DGNS_CD19 dgns_20_cd=ICD_DGNS_CD20 dgns_21_cd=ICD_DGNS_CD21 dgns_22_cd=ICD_DGNS_CD22  
+dgns_23_cd=ICD_DGNS_CD23 dgns_24_cd=ICD_DGNS_CD24 dgns_25_cd=ICD_DGNS_CD25 
+SRGCL_PRCDR_1_CD = PRCDRCD1
+    SRGCL_PRCDR_2_CD = PRCDRCD2
+    SRGCL_PRCDR_3_CD = PRCDRCD3
+    SRGCL_PRCDR_4_CD = PRCDRCD4
+    SRGCL_PRCDR_5_CD = PRCDRCD5
+    SRGCL_PRCDR_6_CD = PRCDRCD6
+    SRGCL_PRCDR_7_CD = PRCDRCD7
+    SRGCL_PRCDR_8_CD = PRCDRCD8
+    SRGCL_PRCDR_9_CD = PRCDRCD9
+    SRGCL_PRCDR_10_CD = PRCDRCD10
+    SRGCL_PRCDR_11_CD = PRCDRCD11
+    SRGCL_PRCDR_12_CD = PRCDRCD12
+    SRGCL_PRCDR_13_CD = PRCDRCD13
+    SRGCL_PRCDR_14_CD = PRCDRCD14
+    SRGCL_PRCDR_15_CD = PRCDRCD15
+    SRGCL_PRCDR_16_CD = PRCDRCD16
+    SRGCL_PRCDR_17_CD = PRCDRCD17
+    SRGCL_PRCDR_18_CD = PRCDRCD18
+    SRGCL_PRCDR_19_CD = PRCDRCD19
+    SRGCL_PRCDR_20_CD = PRCDRCD20
+    SRGCL_PRCDR_21_CD = PRCDRCD21
+    SRGCL_PRCDR_22_CD = PRCDRCD22
+    SRGCL_PRCDR_23_CD = PRCDRCD23
+    SRGCL_PRCDR_24_CD = PRCDRCD24
+    SRGCL_PRCDR_25_CD = PRCDRCD25 )); 
+set  &infile..&indata ;
+
+
+run;
+
+data outpatient (keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25  from_dt thru_dt ICD_PRCDR_CD1-ICD_PRCDR_CD25
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt ICD_PRCDR_CD1-ICD_PRCDR_CD25=PRCDRCD1-PRCDRCD25)); 
+set  &infile..&indata2 ;
+
+run;
+
+data carrier(keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25 from_dt thru_dt 
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata3 ;
+
+run;
+
+data o&yr; set medpar outpatient carrier; run;
+proc sort data= o&yr; by bene_id; run;
+
+data uni&yr;
+merge b_id (in=in1) o&yr (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+%mend;
+%out(2017, tx2017, medpar_all_file17, otptclmsk2017, bcarclmsk2017 );
+%out(2018, tx2018, medpar_all_file18, otptclmsk2018, bcarclmsk2018 );
+%out (2021, TX2021, medpar_all_file, outpatient_base_claims, bcarrier_claims);
+
+/*COMORB*/
+
+data mi_c.como;
+set mi_c.uni2016-mi_c.uni2021;
+run;
+
+/*DATA F;SET MI_C.COMO;
+RUN;
+PROC SORT DATA=F NODUPKEY; BY BENE_ID; RUN;
+
+77338 - ALL CLAIMS 1 YEAR BEFOPRE TO 1 YEAR AFTER
+
+OUT SAMPLE = 2017-2020
+
+MI_C.COMO= 2016-2021*/
+
+/*****************************************************************************************/
+
+
+/*exclude patients with prior hx of anxiety dep amn alz
+ 
+== 1 year before index*/
+
+
+data mi_c.nohx;
+    set mi_c.como;
+    /* Calculate the difference in days between index (request) and discharge dates */
+    days_diff = index_dt - dschrg_dt; 
+
+    /* Keep only those records where the difference is up to 365 days (1 year before the index date) */
+    if days_diff >= 0 and days_diff <= 365; 
+
+    drop days_diff;
+run;
+
+/*removed pt with year 2021 ka discharge*/
+
+data f; set mi_c.nohx;
+yeard=year(dschrg_dt);
+run;
+proc freq data=f;
+tables yeard;run;
+
+data mi_c.nohx;
+set f;
+if yeard=2021 then delete;run;
+
+
+/*no prior conditions*/
+
+DATA hx1; SET mi_c.nohx;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+/* Flags for diseases */
+length d_anxiety d_depression d_amnesia d_dementia  8;
+
+do i = 1 to 25;
+  /* Anxiety codes */
+  if DIA{i} in ("F411", "F410", "F401", "F402", "F419", "F41", "F413", "F418","F4310","F4311","F4312", "F064" ) then d_anxiety=1;
+
+
+  /* Depression codes */
+  if DIA{i} in ("F32A","F320", "F321", "F322", "F323", "F324", "F325", "F3281", "F3289", "F329", 
+"F330", "F331", "F332", "F333", "F334", "F3340", "F3341", "F3342", "F338", "F339", "F320", "F321", "F322"
+"F323", "F324", "F325", "F3289", "F329", "F32A"
+) then d_depression=1; 
+
+
+  /* Amnesia codes */
+  if DIA{i} in ("R410","R411","R412","R413") then d_amnesia=1;  /* Example code for amnesia */
+
+
+  /* Dementia/Alzheimer's codes */
+  if DIA{i} in ("F00", "F000", "F001", "F002", "F009", "F01", "F011", "F012", "F013", "F018", "F019", "F02", "F020", 
+"F021", "F022", "F023", "F024", "F028", "F03", "F051", "F059", "F060", "F067", "F107", "G30", "G308", "G309", "G300",
+"G301", "G310", "G311", "G318", "F0150", "F01511", "F01518", "F0152", "F0153", "F01545", "F0280", "F02811", "F0282", "F0283", 
+"F0284", "F0390", "F03911", "F03918", "F0392","	F0393", "F0394"	) then d_dementia=1;  /* Example codes for dementia and Alzheimer's */
+end;
+RUN;
+
+/* Set missing flags to 0 */
+DATA hx; SET hx1;
+array flags d_anxiety d_depression d_amnesia d_dementia;
+do over flags;
+  if flags=. then flags=0;
+end;
+RUN;
+
+/* Aggregating the max flags per patient */
+proc sql;
+   create table hx_conditions as
+   select bene_id,
+          max(d_anxiety) as hx_anxiety,
+          max(d_depression) as hx_depression,
+          max(d_amnesia) as hx_amnesia,
+          max(d_dementia) as hx_dementia
+		  
+   from hx
+   group by bene_id;
+quit;
+
+
+data mi_c.hx_conditions_final; 
+merge hx_conditions mi_c.bene_mi_inclusion; 
+by bene_id;
+run;
+
+proc print data=mi_c.hx_conditions_final (obs=10); run;
+
+
+
+/*************************************************************************/
+/*remove patienbts with  PRIOR MI
+/**********************************************/
+/* Step 1: Filter out patients with MI history within 1 to 365 days before the index date */
+
+
+data mi_c.nohxmi;
+    set mi_c.como;
+    days_diff = index_dt - dschrg_dt;
+
+    if days_diff >= 1 and days_diff <= 365 then output;
+
+    drop days_diff;
+run;
+
+/* Step 2: Identify patients with MI codes */
+DATA HXMI1 ; 
+SET mi_c.NOHXmi;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213", 
+"I220", "I221", "I228", "I229","I214","I222")
+then OUT=1;
+end;
+RUN;
+
+DATA HXMI; 
+SET HXMI1; 
+IF OUT=. THEN OUT=0; 
+RUN;
+
+proc sql;
+    /* Step 3: Create a summary table to identify patients with any MI history */
+    create table mi_hx as
+    select bene_id, max(out) as history_mi
+    from hxmi
+    group by bene_id;
+quit;
+
+/* Step 4: Merge with your original cohort to retain patients without MI history */
+data no_history;
+merge mi_hx (in=a) mi_c.bene_mi_inclusion (in=b);
+by bene_id;
+if a and b;
+run;
+
+data no_mi;
+set no_history;
+if history_mi=1 then delete;
+run;
+
+proc print data=no_mi (obs=10); run;
+
+data mi_c.no_mi;
+set no_mi; run;
+
+proc contents data=mi_c.no_mi;run;
+
+
+/*COMBINE HX COG AND NO MI HISTIORY*/
+
+Data mi_c.set1;
+merge mi_c.hx_conditions_final (in=a) mi_c.no_mi (in=b);
+by bene_id;
+if a and b;
+run;
+
+/**********************/
+
+
+
+/*outcome
+
+NOW LETS CHECK ANXIETRY DEP AMN DEMEN*/
+
+data mi_c.outcome;
+    set MI_C.COMO;
+    /* Calculate the difference in days between discharge and index (request) dates */
+    days_diff = dschrg_dt - index_dt;
+
+    /* Keep only those records where the difference is up to 365 days (1 years) */
+    if days_diff >= 0 and days_diff <= 365;
+
+    /* Optionally, you can drop the temporary variable 'days_diff' if it's no longer needed */
+    drop days_diff;
+run;
+
+/*anxiety*/
+DATA anx1 ; SET mi_c.outcome;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("F411", "F410", "F401", "F402", "F419", "F41", "F413", "F418","F4310","F4311","F4312", "F064")
+then OUT=1;
+end;
+RUN;
+ 
+DATA anx; SET anx1; 
+IF OUT=. THEN OUT=0; RUN;
+
+proc sql;
+   create table anxi as
+   select bene_id,
+          max(OUT) as anxiety,
+          /* Use min function to get the earliest date where OUT = 1 and ensure the else clause also returns a missing date value */
+          min(case when OUT=1 then dschrg_dt else . end) as anxiety_dt
+   from anx
+   group by bene_id;
+quit;
+
+data anxi; set anxi;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format anxiety_dt mmddyy10.;
+run;
+
+DATA mi_c.anxiety;
+merge mi_c.SET1 (in=in1) anxi (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+/*depression*/
+DATA dep1 ; SET mi_c.outcome;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("F32A","F320", "F321", "F322", "F323", "F324", "F325", "F3281", "F3289", "F329", 
+"F330", "F331", "F332", "F333", "F334", "F3340", "F3341", "F3342", "F338", "F339", "F320", "F321", "F322"
+"F323", "F324", "F325", "F3289", "F329", "F32A")
+then OUT=1;
+end;
+RUN;
+ 
+DATA dep; SET dep1; 
+IF OUT=. THEN OUT=0; RUN;
+
+proc sql;
+   create table depr as
+   select bene_id,
+          max(OUT) as depression,
+          /* Use min function to get the earliest date where OUT = 1 and ensure the else clause also returns a missing date value */
+          min(case when OUT=1 then dschrg_dt else . end) as depression_dt
+   from dep
+   group by bene_id;
+quit;
+
+data depr; set depr;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format depression_dt mmddyy10.;
+run;
+
+
+DATA mi_c.depression;
+merge mi_c.SET1 (in=in1) depr (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+/*amnesia*/
+DATA a1 ; SET mi_c.outcome;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("R410","R411","R412","R413")
+then OUT=1;
+end;
+RUN;
+ 
+DATA a; SET a1; 
+IF OUT=. THEN OUT=0; RUN;
+
+proc sql;
+   create table am as
+   select bene_id,
+          max(OUT) as amnesia,
+          /* Use min function to get the earliest date where OUT = 1 and ensure the else clause also returns a missing date value */
+          min(case when OUT=1 then dschrg_dt else . end) as amnesia_dt
+   from a
+   group by bene_id;
+quit;
+
+data am; set am;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format amnesia_dt mmddyy10.;
+run;
+
+DATA mi_c.amne;
+merge mi_c.SET1 (in=in1) am (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+/*dementia and alzheimers*/
+
+DATA x1 ; SET mi_c.outcome;
+ARRAY DIA {25} ICD_DGNS_CD1-ICD_DGNS_CD25;
+
+do i = 1 to 25;
+  if DIA{i} in ("F00", "F000", "F001", "F002", "F009", "F01", "F011", "F012", "F013", "F018", "F019", "F02", "F020", 
+"F021", "F022", "F023", "F024", "F028", "F03", "F051", "F059", "F060", "F067", "F107", "G30", "G308", "G309", "G300",
+"G301", "G310", "G311", "G318", "F0150", "F01511", "F01518", "F0152", "F0153", "F01545", "F0280", "F02811", "F0282", "F0283", 
+"F0284", "F0390", "F03911", "F03918", "F0392","	F0393", "F0394")
+then OUT=1;
+end;
+RUN;
+
+DATA x; SET x1; 
+IF OUT=. THEN OUT=0; RUN;
+
+
+proc sql;
+   create table de as
+   select bene_id,
+          max(OUT) as dementia,
+          /* Use min function to get the earliest date where OUT = 1 and ensure the else clause also returns a missing date value */
+          min(case when OUT=1 then dschrg_dt else . end) as dementia_dt
+   from x
+   group by bene_id;
+quit;
+
+data de; set de;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format dementia_dt mmddyy10.;
+run;
+
+DATA mi_c.dementia;
+merge mi_c.SET1 (in=in1) de (in=in2);
+by bene_id;
+if in1=1 and in2=1;
+run;
+
+/*********************************************************************************************
+REMOVE PATIENTS WITH HX OF ANX DEP AMN DEMEN*/
+DATA MI_C.ALLDX;
+MERGE MI_C.SET1 MI_C.ANXIETY MI_C.DEPRESSION MI_C.AMNE MI_C.DEMENTIA ;
+BY BENE_ID;
+RUN;
+
+DATA NOHX_ANX;
+SET MI_C.ALLDX;
+if hx_anxiety=1 and anxiety=1 then delete;
+run;
+
+DATA NOHX_dep;
+SET nohx_anx;
+if hx_depression=1 and depression=1 then delete;
+run;
+
+DATA NOHX_amne;
+SET nohx_dep;
+if hx_amnesia=1 and amnesia=1 then delete;
+run;
+
+DATA NOHX_dem;
+SET nohx_amne;
+if hx_dementia=1 and dementia=1 then delete;
+run;
+
+
+data mi_c.ourdata;
+set nohx_dem;
+run;
+
+proc freq data= mi_c.ourdata; tables dementia; run;
+proc print data=mi_c.ourdata (obs=25); run;
+
+
+proc freq data=mi_c.ourdata;
+tables sex*nstemi;run;
+
+data mi_c.male;
+set mi_c.ourdata;
+if sex=1;
+run;
+
+proc means data=mi_c.male; 
+
+var age;
+run;
+
+data mi_c.female;
+set mi_c.ourdata;
+if sex=2;
+run;
+
+proc means data=mi_c.female; 
+
+var age;
+run;
+
+
+proc freq data=mi_c.ourdata;
+tables sft;run;
+
+/*Average age of men & women with STEMI & NSTEMI*/
+
+data mstemi;
+set mi_c.male;
+if stemi=1;
+run;
+proc means data=mstemi;
+var age;
+run;
+
+data mnstemi;
+set mi_c.male;
+if nstemi=1;
+run;
+proc means data=mnstemi;
+var age;
+run;
+
+data fnstemi;
+set mi_c.female;
+if nstemi=1;
+run;
+proc means data=fnstemi;
+var age;
+run;
