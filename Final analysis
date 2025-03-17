@@ -1,0 +1,173 @@
+data mi_c.ourdata
+(keep=bene_id phf AHD PAD LUNG AF PSTR PMI ckd PCI_out pci_outdt PCI PCI_DT hx_anxiety hx_depression hx_amnesia hx_dementia ADMSN_DT index_dt ICD_DGNS_CD1 ICD_DGNS_CD2 ICD_DGNS_CD3 
+ICD_DGNS_CD4 ICD_DGNS_CD5 ICD_DGNS_CD6 ICD_DGNS_CD7 ICD_DGNS_CD8 ICD_DGNS_CD9 ICD_DGNS_CD10 ICD_DGNS_CD11 ICD_DGNS_CD12 ICD_DGNS_CD13 ICD_DGNS_CD14 ICD_DGNS_CD15 ICD_DGNS_CD16 
+ICD_DGNS_CD17 ICD_DGNS_CD18 ICD_DGNS_CD19 ICD_DGNS_CD20 ICD_DGNS_CD21 ICD_DGNS_CD22 ICD_DGNS_CD23 ICD_DGNS_CD24 ICD_DGNS_CD25 PRCDRCD1 PRCDRCD2 PRCDRCD3 PRCDRCD4 PRCDRCD5 PRCDRCD6
+PRCDRCD7 PRCDRCD8 PRCDRCD9 PRCDRCD10 PRCDRCD11 PRCDRCD12 PRCDRCD13 PRCDRCD14 PRCDRCD15 PRCDRCD16 PRCDRCD17 PRCDRCD18 PRCDRCD19 PRCDRCD20 PRCDRCD21 PRCDRCD22 PRCDRCD23 PRCDRCD24 
+PRCDRCD25 STEMI NSTEMI ZIP_CD BENE_DOB DEATH_DT SEX RTI_RACE_CD OREC HMOIND2016 BUYIN2016 HMOIND2017 BUYIN2017 HMOIND2018 BUYIN2018 HMOIND2019 BUYIN2019 HMOIND2020 BUYIN2020 
+HMOIND2021 BUYIN2021 age year I hmoind buyin partAb HMO start end insur history_mi anxiety anxiety_dt depression depression_dt amnesia amnesia_dt dementia dementia_dt CABG 
+CABG_DT SFT SFT_DT final_pci final_pci_date DUAL2016 DUAL2017 DUAL2018 DUAL2019 DUAL2020 dual low_income poor substance dyslipid obesity hypertension diab hx_event race esrd death mi 
+rename= (pci=pci_in pci_dt=pci_indt));
+set mi_c.ourdata;
+run;
+data mi_c.ourdata (rename=(final_pci=pci final_pci_date=pci_dt));
+set mi_c.ourdata;
+run;
+
+
+DATA MI_C.PCI;
+SET MI_C.OURDATA;
+IF PCI=1;
+run;
+data mi_c.cabg;
+set mi_c.ourdata;
+if cabg=1;
+run;
+
+
+
+/*1. Anxiety*/
+data combined_anxiety;
+  set mi_c.pci(in=in_pci) mi_c.cabg(in=in_cabg);
+  if in_pci then treatment = 'PCI';
+  else if in_cabg then treatment = 'CABG';
+  
+  if anxiety_dt^=. and anxiety_dt<=index_dt +365 then length=anxiety_dt-index_dt;
+  else if death_dt^=. and death_dt<=index_dt +365 then length=death_dt-index_dt;
+  else length=365;
+run;
+
+/* PHREG procedure for the combined data */
+proc phreg data=combined_anxiety COVM;
+  class SEX (REF='1') phf (ref='0') pad (ref='0') lung (ref='0') af (ref='0') pstr (ref='0') pmi (ref='0') 
+ckd (ref='0') dyslipid (ref='0') obesity (ref='0') hypertension (ref='0') diab (ref='0') race (REF='1') poor (REF='0') hx_event (ref='0') 
+substance (ref='0') mi (ref='2') esrd (ref='0') treatment (ref='PCI') ;
+  model LENGTH*ANXIETY(0)=  sex mi TREATMENT age phf pad lung af pstr pmi ckd poor substance dyslipid obesity hypertension diab 
+hx_event race esrd /RL ;
+run;
+
+/* LIFETEST procedure for the combined data */
+proc lifetest data=combined_anxiety plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250);
+  time length*anxiety(0);
+  strata sex treatment;
+run;
+
+proc lifetest data=combined_anxiety plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250);
+  time length*anxiety(0);
+  strata sex mi;
+run;
+
+/*2. depression*/
+/* Combine PCI and CABG datasets */
+data combined_dep;
+  set mi_c.pci(in=in_pci) mi_c.cabg(in=in_cabg);
+  if in_pci then treatment = 'PCI';
+  else if in_cabg then treatment = 'CABG';
+  
+  if depression_dt^=. and depression_dt<=index_dt +365 then length=depression_dt-index_dt;
+  else if death_dt^=. and death_dt<=index_dt +365 then length=death_dt-index_dt;
+  else length=365;
+run;
+
+/* PHREG procedure for the combined data */
+proc phreg data=combined_dep COVM;
+  class SEX (REF='1') phf (ref='0') pad (ref='0') lung (ref='0') af (ref='0') pstr (ref='0') pmi (ref='0') 
+ckd (ref='0') dyslipid (ref='0') obesity (ref='0') hypertension (ref='0') diab (ref='0') race (REF='1') poor (REF='0') hx_event (ref='0') 
+substance (ref='0') mi (ref='2') esrd (ref='0') treatment (ref='PCI') ;
+model LENGTH*depression(0)= sex mi TREATMENT age phf pad lung af pstr pmi ckd poor substance dyslipid obesity hypertension diab hx_event race 
+esrd / RL;
+run;
+
+/* LIFETEST procedure for the combined data */
+proc lifetest data=combined_dep plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250); 
+  time length*depression(0);
+  strata sex treatment;
+run;
+
+proc lifetest data=combined_dep plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250); 
+  time length*depression(0);
+  strata sex MI;
+run;
+
+
+/*3 AMNESIA*/
+/* Combine PCI and CABG datasets */
+data combined_amne;
+  set mi_c.pci(in=in_pci) mi_c.cabg(in=in_cabg);
+  if in_pci then treatment = 'PCI';
+  else if in_cabg then treatment = 'CABG';
+  
+  if amnesia_dt^=. and amnesia_dt<=index_dt +365 then length=amnesia_dt-index_dt;
+  else if death_dt^=. and death_dt<=index_dt +365 then length=death_dt-index_dt;
+  else length=365;
+run;
+
+/* PHREG procedure for the combined data */
+proc phreg data=combined_amne COVM;
+  class SEX (REF='1') phf (ref='0') pad (ref='0') lung (ref='0') af (ref='0') pstr (ref='0') pmi (ref='0') 
+ckd (ref='0') dyslipid (ref='0') obesity (ref='0') hypertension (ref='0') diab (ref='0') race (REF='1') poor (REF='0') hx_event (ref='0') 
+substance (ref='0') mi (ref='2') esrd (ref='0') treatment (ref='PCI') ;
+
+model LENGTH*Amnesia(0)= sex  MI TREATMENT age phf pad lung af pstr pmi ckd poor substance dyslipid obesity hypertension diab hx_event 
+race esrd / rl;
+run;
+
+/* LIFETEST procedure for the combined data */
+proc lifetest data=combined_amne plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250);
+  time length*amnesia(0);
+  strata sex treatment;
+run;
+
+proc lifetest data=combined_AMNE plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250); 
+  time length*AMNESIA(0);
+  strata sex MI;
+run;
+
+
+/*DEMENTIA*/
+/* Combine PCI and CABG datasets */
+data combined_DEM;
+  set mi_c.pci(in=in_pci) mi_c.cabg(in=in_cabg);
+  if in_pci then treatment = 'PCI';
+  else if in_cabg then treatment = 'CABG';
+  
+  if DEMENTIA_dt^=. and DEMENTIA_dt<=index_dt +365 then length=DEMENTIA_dt-index_dt;
+  else if death_dt^=. and death_dt<=index_dt +365 then length=death_dt-index_dt;
+  else length=365;
+run;
+
+/* PHREG procedure for the combined data */
+proc phreg data=combined_DEM COVM;
+  class SEX (REF='1') phf (ref='0') pad (ref='0') lung (ref='0') af (ref='0') pstr (ref='0') pmi (ref='0') 
+ckd (ref='0') dyslipid (ref='0') obesity (ref='0') hypertension (ref='0') diab (ref='0') race (REF='1') poor (REF='0') hx_event (ref='0') 
+substance (ref='0') mi (ref='2') esrd (ref='0') treatment (ref='PCI') ;
+
+model LENGTH*DEMENTIA(0)= sex MI age phf pad lung af pstr pmi ckd poor substance dyslipid obesity hypertension diab hx_event race 
+esrd TREATMENT /rl;
+run;
+
+/* LIFETEST procedure for the combined data */
+proc lifetest data=combined_dem plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250);
+  time length*dementia(0);
+  strata sex treatment;
+run;
+
+proc lifetest data=combined_deM plots=survival(test atrisk
+(atrisktick maxlen=13 outside)=0 50 100 150 200 250); 
+  time length*DEMENTIA(0);
+  strata sex MI;
+run;
+
+
+/*check assumption - proportional hazard*/
+proc phreg data=combined_amne;
+class sex (ref='1');
+    model length*amnesia(0) = sex;
+    assess ph / resample;  /* "ph" stands for proportional hazards */
+run;
