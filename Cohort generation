@@ -1,0 +1,311 @@
+%macro cr(yr, infile, indata, indata2, indata3);
+
+data medpar (keep=bene_id DGNSCD1-DGNSCD25 PRCDRCD1-PRCDRCD25 ADMSNDT DSCHRGDT STEMI NSTEMI
+rename=(admsndt=admsn_dt DSCHRGDT=dschrg_dt DGNSCD1-DGNSCD25=ICD_DGNS_CD1-ICD_DGNS_CD25 )); 
+set  &infile..&indata ;
+
+if DGNSCD1 IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF DGNSCD1 IN ("I214" ) THEN NSTEMI=1; 
+if STEMI = 1 OR NSTEMI=1;
+    run;
+
+data outpatient (keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25  from_dt thru_dt STEMI NSTEMI
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata2 ;
+
+if ICD_DGNS_CD1 IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF ICD_DGNS_CD1 IN ("I214") THEN NSTEMI=1;
+if STEMI = 1 OR NSTEMI=1;
+run;
+
+
+data carrier(keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25 from_dt thru_dt STEMI NSTEMI
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata3 ;
+if ICD_DGNS_CD1 IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF ICD_DGNS_CD1 IN ("I214") THEN NSTEMI=1;
+if STEMI = 1 OR NSTEMI=1;
+run;
+
+data MI&yr; set medpar outpatient carrier; run;
+PROC SORT DATA= MI&YR; BY BENE_ID; RUN;
+
+%mend;
+
+%CR(2019, tx2019, medpar2019, otptclms2019, bcarclms2019 );
+%CR(2020, tx2020, medpar2020, otptclms2020, bcarclms2020 );
+
+%macro cr(yr, infile, indata, indata2, indata3);
+
+data medpar (keep=bene_id dgns_1_cd--dgns_25_cd SRGCL_PRCDR_1_CD--SRGCL_PRCDR_25_CD admsn_dt dschrg_dt STEMI NSTEMI
+rename=(dgns_1_cd=ICD_DGNS_CD1 dgns_2_cd=ICD_DGNS_CD2 dgns_3_cd=ICD_DGNS_CD3 dgns_4_cd=ICD_DGNS_CD4 
+dgns_5_cd=ICD_DGNS_CD5 dgns_6_cd=ICD_DGNS_CD6 dgns_7_cd=ICD_DGNS_CD7 dgns_8_cd=ICD_DGNS_CD8 dgns_9_cd=ICD_DGNS_CD9 dgns_10_cd=ICD_DGNS_CD10
+dgns_11_cd=ICD_DGNS_CD11 dgns_12_cd=ICD_DGNS_CD12 dgns_13_cd=ICD_DGNS_CD13 dgns_14_cd=ICD_DGNS_CD14 dgns_15_cd=ICD_DGNS_CD15 dgns_16_cd=ICD_DGNS_CD16 
+dgns_17_cd=ICD_DGNS_CD17 dgns_18_cd=ICD_DGNS_CD18 dgns_19_cd=ICD_DGNS_CD19 dgns_20_cd=ICD_DGNS_CD20 dgns_21_cd=ICD_DGNS_CD21 dgns_22_cd=ICD_DGNS_CD22  
+dgns_23_cd=ICD_DGNS_CD23 dgns_24_cd=ICD_DGNS_CD24 dgns_25_cd=ICD_DGNS_CD25 
+SRGCL_PRCDR_1_CD = PRCDRCD1
+    SRGCL_PRCDR_2_CD = PRCDRCD2
+    SRGCL_PRCDR_3_CD = PRCDRCD3
+    SRGCL_PRCDR_4_CD = PRCDRCD4
+    SRGCL_PRCDR_5_CD = PRCDRCD5
+    SRGCL_PRCDR_6_CD = PRCDRCD6
+    SRGCL_PRCDR_7_CD = PRCDRCD7
+    SRGCL_PRCDR_8_CD = PRCDRCD8
+    SRGCL_PRCDR_9_CD = PRCDRCD9
+    SRGCL_PRCDR_10_CD = PRCDRCD10
+    SRGCL_PRCDR_11_CD = PRCDRCD11
+    SRGCL_PRCDR_12_CD = PRCDRCD12
+    SRGCL_PRCDR_13_CD = PRCDRCD13
+    SRGCL_PRCDR_14_CD = PRCDRCD14
+    SRGCL_PRCDR_15_CD = PRCDRCD15
+    SRGCL_PRCDR_16_CD = PRCDRCD16
+    SRGCL_PRCDR_17_CD = PRCDRCD17
+    SRGCL_PRCDR_18_CD = PRCDRCD18
+    SRGCL_PRCDR_19_CD = PRCDRCD19
+    SRGCL_PRCDR_20_CD = PRCDRCD20
+    SRGCL_PRCDR_21_CD = PRCDRCD21
+    SRGCL_PRCDR_22_CD = PRCDRCD22
+    SRGCL_PRCDR_23_CD = PRCDRCD23
+    SRGCL_PRCDR_24_CD = PRCDRCD24
+    SRGCL_PRCDR_25_CD = PRCDRCD25 )); 
+set  &infile..&indata ;
+
+if DGNS_1_CD IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF DGNS_1_CD IN ("I214") THEN NSTEMI=1;
+if STEMI = 1 OR NSTEMI=1;
+run;
+
+data outpatient (keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25  from_dt thru_dt STEMI NSTEMI
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata2 ;
+if ICD_DGNS_CD1 IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF ICD_DGNS_CD1 IN ("I214") THEN NSTEMI=1;
+if STEMI = 1 OR NSTEMI=1;
+run;
+
+
+data carrier(keep=bene_id ICD_DGNS_CD1-ICD_DGNS_CD25 from_dt thru_dt STEMI NSTEMI
+rename=(from_dt=admsn_dt thru_dt=dschrg_dt)); 
+set  &infile..&indata3 ;
+if ICD_DGNS_CD1 IN ("I21", "I210", "I2101", "I2102", "I2109", "I211", "I2111", "I2119", "I212", "I2121", "I2129", "I213") 
+THEN STEMI=1;
+IF ICD_DGNS_CD1 IN ("I214") THEN NSTEMI=1;
+if STEMI = 1 OR NSTEMI=1;
+run;
+
+data MI&yr; set medpar outpatient carrier; run;
+PROC SORT DATA= MI&YR; BY BENE_ID; RUN;
+
+%mend;
+
+%CR(2017, tx2017, medpar_all_file17, otptclmsk2017, bcarclmsk2017 );
+%CR(2018, tx2018, medpar_all_file18, otptclmsk2018, bcarclmsk2018 );
+
+data miall ; 
+    set mi2017 mi2018 mi2019 mi2020; 
+	run;
+
+proc sort data=miall; by bene_id dschrg_dt; run;
+
+data miall;
+    set miall;
+    /* Apply the MMDDYY10. format to the dschrg_dt variable */
+    format DSCHRG_dt mmddyy10.;
+run;
+
+data mi_All;
+set miall;
+if first.bene_id; 
+by bene_id;
+run;
+
+data mi_all;
+set mi_all;
+if nstemi=. then nstemi=0;
+if stemi=. then stemi=0;
+run;
+
+data mi_c.miall;
+set mi_all;
+run;
+
+proc freq data=mi_C.MIall;
+tables stemi*nstemi;
+run;
+
+/*149677 TOTAL STEMI, NSTEMI PATIENTS
+
+mi_c.miall= 149677*/
+
+
+
+%MACRO MBSF (YR,INFILE,INDATA);
+DATA BENE (KEEP=BENE_DOB BENE_ID DEATH_DT OREC RTI_RACE_CD SEX ZIP_CD HMOIND&YR BUYIN&YR);
+SET &INFILE..&INDATA;
+HMOIND&YR= COMPRESS (HMOIND01||HMOIND02||HMOIND03||HMOIND04||HMOIND05||HMOIND06||HMOIND07||HMOIND08||HMOIND09||HMOIND10||HMOIND11||HMOIND12||" ");
+BUYIN&YR= COMPRESS (BUYIN01||BUYIN02||BUYIN03||BUYIN04||BUYIN05||BUYIN06||BUYIN07||BUYIN08||BUYIN09||BUYIN10||BUYIN11||BUYIN12||" ");
+RUN;
+
+DATA BENE&YR; SET BENE; RUN;
+%MEND;
+%MBSF(2019, TX2019, MBSF_ABCD2019);
+%MBSF(2016, TX2016, MBSF_ABCD2016);
+%MBSF(2020, TX2020, MBSF_ABCD2020);
+
+%MACRO MBSF(YR, INFILE, INDATA);
+  DATA BENE(KEEP = BENE_BIRTH_DT BENE_ID BENE_DEATH_DT ENTLMT_RSN_ORIG RTI_RACE_CD SEX_IDENT_CD ZIP_CD HMOIND&YR BUYIN&YR
+    RENAME = (BENE_BIRTH_DT = BENE_DOB BENE_DEATH_DT = DEATH_DT SEX_IDENT_CD = SEX ENTLMT_RSN_ORIG = OREC)); 
+  SET &INFILE..&INDATA;
+  HMOIND&YR = COMPRESS(HMO_IND_01||HMO_IND_02||HMO_IND_03||HMO_IND_04||HMO_IND_05||HMO_IND_06||HMO_IND_07||HMO_IND_08||HMO_IND_09||HMO_IND_10||HMO_IND_11||HMO_IND_12||" ");
+  BUYIN&YR = COMPRESS(MDCR_ENTLMT_BUYIN_IND_01||MDCR_ENTLMT_BUYIN_IND_02||MDCR_ENTLMT_BUYIN_IND_03||MDCR_ENTLMT_BUYIN_IND_04||MDCR_ENTLMT_BUYIN_IND_05||MDCR_ENTLMT_BUYIN_IND_06||MDCR_ENTLMT_BUYIN_IND_07||MDCR_ENTLMT_BUYIN_IND_08||MDCR_ENTLMT_BUYIN_IND_09||MDCR_ENTLMT_BUYIN_IND_10||MDCR_ENTLMT_BUYIN_IND_11||MDCR_ENTLMT_BUYIN_IND_12||" ");
+  RUN; 
+  DATA BENE&YR; SET BENE; RUN;
+%MEND;
+%MBSF(2017, TX2017, mbsf_abcd_summary17);
+%MBSF(2018, TX2018, mbsf_abcd_summary18);
+%MBSF (2021, TX2021, mbsf_abcd_summary);
+
+PROC SORT DATA=BENE2021; BY BENE_ID; RUN;
+
+proc sort data= benesum; by bene_id; run;
+
+data benesum;
+merge bene2016-bene2021;
+by bene_id;
+run;
+
+data bene_mi;
+merge MI_C.miall (in=a) benesum (in=b);
+by bene_id;
+if a and b; run;
+
+
+data bene_mi (rename=(dschrg_dt=index_dt));
+set bene_mi;
+run;
+proc print data=cohort1 (obs=10); run;
+
+data bene_mi;
+set bene_mi;
+if index_dt=. then delete; run;
+
+data cohort1; set bene_mi; 
+age = intck('YEAR', BENE_DOB, index_dt); /* Calculate age in years */
+run;
+
+
+data cohort2; set cohort1;
+year= year(index_dt);
+run;
+
+
+DATA COHORT2;
+    SET COHORT2;
+    IF DEATH_DT = INDEX_DT THEN DELETE;
+RUN;
+
+
+DATA COHORT2;
+    SET COHORT2;
+    IF DEATH_DT NE . AND DEATH_DT < INDEX_DT THEN DELETE;
+RUN;
+
+
+data cohort; set cohort2; 
+array miss {6} HMOIND2016-HMOIND2021;
+DO I=1 TO 6;
+IF miss{i}= "" then miss{i}= "HHHHHHHHHHHH";
+END; RUN; 
+
+data cohort_1; set cohort;
+array m2 {6} BUYIN2016-BUYIN2021;
+DO I=1 to 6;
+if m2{i}= "" then m2{i}= "ZZZZZZZZZZZZ";
+END; RUN;
+
+
+data COMPRESS;
+set cohort_1;
+hmoind=compress (hmoind2016||hmoind2017||hmoind2018||hmoind2019||hmoind2020||hmoind2021);
+buyin=compress(buyin2016||buyin2017||buyin2018||buyin2019||buyin2020||buyin2021);
+run;
+
+data compress;
+set compress;
+if year=. then delete; run;
+
+data bene;
+set compress;
+partAb=0;
+HMO=0;
+
+start=(year-2016)*12+month (index_dt) -12;
+if death_dt^=. and death_dt<=index_dt+365 then end=(year(death_dt)-2016)*12+month (death_dt) ;
+else end=(year(index_dt+365)-2016)*12+month (index_dt+365) ;
+
+do i=start to end until (substr(buyin,i,1) not in ("3", "C"));
+if substr(buyin,i,1) in  ("3", "C") then partAb+1; END;
+
+do i=start to end until (substr(HMOIND,i,1) not in ("0"));
+if substr(HMOIND,i,1) in  ("0") then HMO+1; END;
+
+if partAb=end-start+1 and HMO=end-start+1 then insur=1; else insur=0;
+if insur=1;
+run;
+
+data bene;
+set bene;
+if age<65 then delete;
+run;
+
+data bene;
+set bene;
+if sex=0 or sex=. then delete;
+run;
+
+proc contents data=mi_c.bene_MI_INCLUSION; run;
+
+
+data orec0;
+set bene;
+if orec=0;
+run;
+
+data orec1;
+set bene;
+if orec=1;
+run;
+
+data orec2;
+set bene;
+if orec=2;
+run;
+
+data orec3;
+set bene;
+if orec=3;
+run;
+
+DATA ORECNO;
+SET BENE;
+IF OREC=.;
+RUN;
+
+
+
+DATA MI_C.BENE_MI_INCLUSION;
+SET BENE;
+RUN;
+
+
+/*MI_C.BENE_MI_INCLUSION = 77338 observations
+*/
+
+data b_id (keep=bene_id stemi nstemi index_dt);
+set mi_c.BENE_MI_INCLUSION;
+run;
